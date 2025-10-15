@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCII Art Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0f0f0f;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 1px solid #333;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 0.95rem;
+        }
+
+        .controls {
+            background: #1a1a1a;
+            padding: 2rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .control-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select {
+            background: #2d2d2d;
+            color: #e0e0e0;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        select:hover {
+            border-color: #667eea;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: #2d2d2d;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .checkbox-group:hover {
+            background: #333;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .checkbox-label {
+            color: #e0e0e0;
+            font-size: 0.95rem;
+            cursor: pointer;
+            text-transform: none;
+        }
+
+        .dial-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: #2d2d2d;
+            border-radius: 8px;
+        }
+
+        .dial-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 4px;
+            background: #444;
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+
+        .dial-value {
+            min-width: 60px;
+            text-align: right;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .upload-section {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .upload-area {
+            border: 2px dashed #444;
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            background: #1a1a1a;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #222;
+        }
+
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #252525;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            color: #aaa;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-hint {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #333;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .canvas-section {
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        .canvas-container {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 2rem;
+            min-height: 500px;
+            overflow: auto;
+        }
+
+        .canvas {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 0.6;
+            white-space: pre;
+            color: #e0e0e0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #667eea;
+        }
+
+        .spinner {
+            border: 3px solid #333;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status {
+            text-align: center;
+            padding: 1rem;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .error {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>ASCII Art Generator</h1>
+        <p class="subtitle">Transform your images into beautiful ASCII art</p>
+    </header>
+
+    <div class="controls">
+        <div class="control-grid">
+            <div class="control-group">
+                <label>Render Mode</label>
+                <select id="renderMode">
+                    <option value="realtime">Realtime (SSE)</option>
+                    <option value="batch">Batch (Complete)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Detail Type</label>
+                <select id="artType">
+                    <option value="BINARY">Binary</option>
+                    <option value="SIMPLE">Simple</option>
+                    <option value="DETAIL" selected>Detail</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Thread Type</label>
+                <select id="threadType">
+                    <option value="SINGLE" selected>Single</option>
+                    <option value="MULTI">Multi</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Options</label>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="reverse">
+                    <label class="checkbox-label" for="reverse">Reverse</label>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Font Size</label>
+                <div class="dial-group">
+                    <div class="dial-container">
+                        <input type="range" id="fontSize" min="1" max="200" value="120" step="1">
+                        <span class="dial-value" id="fontSizeValue">12.0px</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="upload-section">
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">Click to upload or drag and drop</div>
+            <div class="upload-hint">PNG, JPG, GIF (Large images will be auto-resized)</div>
+            <input type="file" id="fileInput" accept="image/*">
+        </div>
+        <div class="status" id="status"></div>
+    </div>
+
+    <div class="canvas-section">
+        <div class="canvas-container">
+            <div class="canvas" id="canvas"></div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const canvas = document.getElementById('canvas');
+        const status = document.getElementById('status');
+        const renderMode = document.getElementById('renderMode');
+        const artType = document.getElementById('artType');
+        const threadType = document.getElementById('threadType');
+        const reverse = document.getElementById('reverse');
+        const fontSizeInput = document.getElementById('fontSize');
+        const fontSizeValue = document.getElementById('fontSizeValue');
+
+        let currentEventSource = null;
+        let currentId = null;
+
+        fontSizeInput.addEventListener('input', (e) => {
+            const size = e.target.value / 10;
+            fontSizeValue.textContent = size.toFixed(1) + 'px';
+            canvas.style.fontSize = size + 'px';
+        });
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        async function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                showError('Please select an image file');
+                return;
+            }
+
+            const maxSizeInMB = 30;
+            const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
+
+            if (file.size > maxSizeInBytes) {
+                showError(`File size exceeds ${maxSizeInMB}MB limit`);
+                return;
+            }
+
+            canvas.innerHTML = '';
+
+            const resizedFile = await resizeImageIfNeeded(file);
+
+            if (renderMode.value === 'realtime') {
+                await handleRealtimeRender(resizedFile);
+            } else {
+                await handleBatchRender(resizedFile);
+            }
+        }
+
+        async function resizeImageIfNeeded(file) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                const reader = new FileReader();
+
+                reader.onload = (e) => {
+                    img.onload = () => {
+                        const maxWidth = 1920;
+                        const maxHeight = 1080;
+
+                        if (img.width <= maxWidth && img.height <= maxHeight) {
+                            resolve(file);
+                            return;
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+
+                        const widthRatio = maxWidth / img.width;
+                        const heightRatio = maxHeight / img.height;
+                        const ratio = Math.min(widthRatio, heightRatio);
+
+                        canvas.width = img.width * ratio;
+                        canvas.height = img.height * ratio;
+
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                        canvas.toBlob((blob) => {
+                            const resizedFile = new File([blob], file.name, {
+                                type: file.type,
+                                lastModified: Date.now()
+                            });
+                            resolve(resizedFile);
+                        }, file.type, 0.9);
+                    };
+
+                    img.src = e.target.result;
+                };
+
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function handleRealtimeRender(file) {
+            if (currentEventSource) {
+                currentEventSource.close();
+            }
+
+            linesArray = [];
+            showLoading();
+            status.textContent = 'Connecting to SSE...';
+
+            currentEventSource = new EventSource('/ascii-art/generate/async/connect');
+
+            currentEventSource.addEventListener('ID', async (e) => {
+                const data = JSON.parse(e.data);
+                currentId = data.payload;
+                canvas.textContent = '';
+                status.textContent = 'Connected. Uploading image...';
+                await uploadImage(file, currentId);
+            });
+
+            currentEventSource.addEventListener('PRINT_LINE', (e) => {
+                const data = JSON.parse(e.data);
+                renderLine(data.payload);
+                status.textContent = 'Rendering...';
+            });
+
+            currentEventSource.addEventListener('error', () => {
+                currentEventSource.close();
+                status.textContent = 'Complete';
+            });
+        }
+
+        async function uploadImage(file, id) {
+            const formData = new FormData();
+            formData.append('image', file);
+
+            const params = new URLSearchParams({
+                id: id,
+                artType: artType.value,
+                reverse: reverse.checked,
+                threadType: threadType.value
+            });
+
+            try {
+                await fetch(`/ascii-art/generate/async/upload?${params}`, {
+                    method: 'POST',
+                    body: formData
+                });
+            } catch (error) {
+                showError('Upload failed: ' + error.message);
+            }
+        }
+
+        async function handleBatchRender(file) {
+            showLoading();
+            status.textContent = 'Processing...';
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            const params = new URLSearchParams({
+                artType: artType.value,
+                reverse: reverse.checked,
+                threadType: threadType.value
+            });
+
+            try {
+                const response = await fetch(`/ascii-art/generate?${params}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Generation failed');
+                }
+
+                const data = await response.json();
+                canvas.innerHTML = '';
+                data.forEach(line => renderLine(line));
+                status.textContent = 'Complete';
+            } catch (error) {
+                showError('Generation failed: ' + error.message);
+            }
+        }
+
+        let linesArray = [];
+
+        function renderLine(lineData) {
+            const { y, chars } = lineData;
+
+            while (linesArray.length <= y) {
+                linesArray.push('');
+            }
+
+            linesArray[y] = chars;
+            canvas.textContent = linesArray.join('\n');
+        }
+
+        function showLoading() {
+            canvas.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div>Generating ASCII art...</div>
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            canvas.innerHTML = `<div class="error">${message}</div>`;
+            status.textContent = 'Error';
+        }
+    </script>
+</body>
+</html>
